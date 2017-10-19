@@ -5,12 +5,18 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #chat { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; z-index: 0; }
+      #chat input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      #chat button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #name { background: rgba(0,0,0,0.5); position: fixed; width: 100%; height: 100vh; z-index: 1; }
+      #name fieldset { margin: auto; margin-top: 100px; width: 400px; border: 0; background-color: #FFF; }
+      #name label { display: inline-block; border: 0; padding: 10px; margin-right: 1%; width: 30%;}
+      #name input { border: 0; padding: 10px; width: 68%;}
+      #name button { width: 100%; background: rgb(130, 224, 255); border: none; padding: 10px; }
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
+      #connected { color: #2b821d; }
     </style>
   </head>
   <script src="/socket.io/socket.io.js"></script>
@@ -18,19 +24,36 @@
   <script>
     $(function () {
       var socket = io();
-      $('form').submit(function(){
-        socket.emit('chat message', $('#m').val());
+      var user = "";
+      $('#name').submit(function(){
+        user = $('#n').val();
+        socket.emit('connection message', user + " has connected to the chat");
+        var element = document.getElementById("name");
+        element.parentNode.removeChild(element);
+      });
+      $('#chat').submit(function(){
+        if(user != "")
+          socket.emit('chat message', user + ": " + $('#m').val());
         $('#m').val('');
         return false;
       });
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
+      socket.on('connection message', function(msg){
+        $('#messages').append($('<li id="connected">').text(msg));
+      });
     });
   </script>
   <body>
+    <form id="name" action="">
+      <fieldset>
+        <label>Enter name:</label>
+        <input id="n" autocomplete="off" /><button>Send</button>
+      </fieldset>
+    </form>
     <ul id="messages"></ul>
-    <form action="">
+    <form id="chat" action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
   </body>
