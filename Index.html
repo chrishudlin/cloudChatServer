@@ -32,8 +32,11 @@
         element.parentNode.removeChild(element);
       });
       $('#chat').submit(function(){
+        var d = Date(Date.now());
+        //var t = " [ " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + " ] ";
+        var msg = d + user + ": " + $('#m').val();
         if(user != "")
-          socket.emit('chat message', user + ": " + $('#m').val());
+          socket.emit('chat message', msg);
         $('#m').val('');
         return false;
       });
