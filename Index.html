@@ -5,6 +5,8 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font: 13px Helvetica, Arial; }
+      #error { display: none; }
+      #error p { color: #FF0000; }
       #chat { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; z-index: 0; }
       #chat input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       #chat button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
@@ -17,6 +19,7 @@
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: #eee; }
       #connected { color: #2b821d; }
+      #disconnected { color: #FF0000; }
     </style>
   </head>
   <script src="/socket.io/socket.io.js"></script>
@@ -27,13 +30,20 @@
       var user = "";
       $('#name').submit(function(){
         user = $('#n').val();
-        socket.emit('connection message', user + " has connected to the chat");
+        socket.emit('user given', user);
+        $('#n').val("");
+      });
+      socket.on('connection success', function(){
         var element = document.getElementById("name");
         element.parentNode.removeChild(element);
       });
+      socket.on('user taken', function(){
+        user = "";
+        $("#error").show();
+      });
       $('#chat').submit(function(){
         var d = Date(Date.now());
-        //var t = " [ " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + " ] ";
+        //var t = " [ " + d.getHours().toString() + ":" + d.getMinutes().toString() + ":" + d.getSeconds().toString() + " ] ";
         var msg = d + user + ": " + $('#m').val();
         if(user != "")
           socket.emit('chat message', msg);
@@ -43,13 +53,19 @@
       socket.on('chat message', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
-      socket.on('connection message', function(msg){
-        $('#messages').append($('<li id="connected">').text(msg));
+      socket.on('new user connected', function(u){
+        $('#messages').append($('<li id="connected">').text(u + " has connected to the chat"));
+      });
+      socket.on('user disconnected', function(u){
+        $('#messages').append($('<li id="disconnected">').text(u + " has disconnected from the chat"));
       });
     });
   </script>
   <body>
     <form id="name" action="">
+      <div id="error">
+        <p>*Error, username already taken!</p>
+      </div>
       <fieldset>
         <label for="n">Enter name:</label>
         <input id="n" autocomplete="off" required/><button>Send</button>
