@@ -12,6 +12,7 @@ io.on('connection', function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
   });
+
   socket.on('user given', function(userGiven){
     if(users.indexOf(userGiven) > -1) {
       socket.emit('user taken');
@@ -23,6 +24,7 @@ io.on('connection', function(socket){
       io.emit('new user connected', u);
     }
   });
+
   socket.on('disconnect', function(){
     if(u != null){
       users.pop(u);
@@ -30,6 +32,7 @@ io.on('connection', function(socket){
       console.log(u + ' disconnected');
     }
   });
+
 });
 
 http.listen(3000, function(){
