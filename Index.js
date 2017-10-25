@@ -8,33 +8,28 @@ app.get('/', function(req, res){
 });
 
 io.on('connection', function(socket){
-  var u;
+  var u = "";
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
   });
-
-  socket.on('user given', function(userGiven){
-    if(users.indexOf(userGiven) > -1) {
-      socket.emit('user taken');
+  socket.on('user connected', function(userGiven){
+    if(users.indexOf(userGiven) > -1){
+      //socket.emit('connection unsuccessful');
     }else{
       u = userGiven;
-      users.push(u);
-      console.log(u + ' connected');
-      socket.emit('connection success');
-      io.emit('new user connected', u);
+      //socket.emit('connection successful', u);
+      io.emit('connection message', userGiven + " has connected to the chat");
+      console.log(userGiven + ' connected');
     }
   });
-
   socket.on('disconnect', function(){
-    if(u != null){
-      users.pop(u);
-      io.emit('user disconnected', u);
+    if(u != ""){
+      io.emit('disconnection message', u + " has disconnected to the chat");
       console.log(u + ' disconnected');
     }
   });
-
 });
 
 http.listen(3000, function(){
-  console.log('listening on *:3000');
+   console.log('listening on *:3000');
 });
