@@ -1,3 +1,5 @@
+//Created by Elliott Hill [Student ID: 307661]
+//and Chris Hudlin [Student ID: 307555]
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);

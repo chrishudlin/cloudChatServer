@@ -1,7 +1,7 @@
 {
   "name": "socket-chat-example",
   "version": "0.0.1",
-  "description": "my first socket.io app",
+  "description": "first excercise for the socket.io chat application, created by Elliott Hill [Student ID: 307661] and Chris Hudlin [Student ID: 307555]",
   "dependencies": {
     "express": "^4.15.2",
     "socket.io": "^2.0.4"
