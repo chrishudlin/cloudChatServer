@@ -5,8 +5,6 @@
      <style>
        * { margin: 0; padding: 0; box-sizing: border-box; }
        body { font: 13px Helvetica, Arial; }
-       #error { display: none; }
-       #error p { color: #FF0000; }
        #chat { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; z-index: 0; }
        #chat input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
        #chat button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
@@ -20,6 +18,8 @@
        #messages li:nth-child(odd) { background: #eee; }
        #connected { color: #2b821d; }
        #disconnected { color: #F00; }
+       #info { color: #00F; }
+       #private { color: #c9af04; }
      </style>
    </head>
    <script src="/socket.io/socket.io.js"></script>
@@ -28,44 +28,73 @@
      $(function () {
        var socket = io();
        var user = "";
+       var privateUser = "";
        $('#name').submit(function(){
-         var u = $('#n').val();
-         socket.emit('user connected', u);
-       /*});
-       socket.on('connection successful', function(u){*/
-         user = u;
+         user = $('#n').val();
+         socket.emit('user connected', user);
          var element = document.getElementById("name");
          element.parentNode.removeChild(element);
        });
        $('#chat').submit(function(){
-          var d = Date(Date.now());
-          //var t = " [ " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + " ] ";
-          var msg = d + user + ": " + $('#m').val();
-          if(user != "")
-            socket.emit('chat message', msg);
+         message = $('#m').val()
+         if(message.charAt(0) == "\\"){
+             if(message == "\\list"){
+               socket.emit('get users', function(users){
+                 $('#messages').append($('<li id="info">').text("Online Users:"));
+                 users.forEach(listOfUsers);
+               })
+             }else if(message == "\\all"){
+               $('#messages').append($('<li id="private">').text("Now messaging all"));
+               privateUser = "";
+             }else{
+               var wantedUser = message.substr(1);
+               socket.emit('get user for private chat', wantedUser, function(confirmation){
+                 if(confirmation){
+                   $('#messages').append($('<li id="private">').text("Now privately messaging " + wantedUser));
+                   privateUser = wantedUser;
+                 }else{
+                   $('#messages').append($('<li id="private">').text("User doesn't exist"));
+                 }
+               });
+             }
+         }else{
+            var d = Date(Date.now());
+            //var t = " [ " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + " ] ";
+            if(user != ""){
+              if(privateUser != ""){
+              var msg = d + " " + user + " to " + privateUser + ": " + $('#m').val();
+                socket.emit('private chat message', privateUser, msg);
+                $('#messages').append($('<li id="private">').text(msg));
+              }else {
+              var msg = d + user + ": " + $('#m').val();
+                socket.emit('chat message', msg);
+              }
+            }
+          }
           $('#m').val('');
           return false;
         });
-       socket.on('connection unsuccessful', function(){
-         $('#n').val() = "";
-         $('#error').show();
-       });
        socket.on('chat message', function(msg){
          $('#messages').append($('<li>').text(msg));
        });
+       socket.on('private chat message', function(userGiven, msg){
+         if(userGiven == user){
+            $('#messages').append($('<li id="private">').text(msg));
+          }
+        });
        socket.on('connection message', function(msg){
          $('#messages').append($('<li id="connected">').text(msg));
        });
        socket.on('disconnection message', function(msg){
          $('#messages').append($('<li id="disconnected">').text(msg));
        });
+       function listOfUsers(u, index){
+         $('#messages').append($('<li id="info">').text((index + 1) + ". " + u));
+       }
      });
    </script>
    <body>
      <form id="name" action="">
-       <div id="error">
-         <p>*Error, username already taken!</p>
-       </div>
        <fieldset>
          <label for="n">Enter name:</label>
          <input id="n" autocomplete="off" required/><button>Send</button>
