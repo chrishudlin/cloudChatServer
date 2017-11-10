@@ -1,7 +1,7 @@
 ---
 applications:
-- name: cranky-kirch
+- name: chris-hudlinjs
   memory: 512m
   instances: 1
   buildpack: nodejs_buildpack
-  host: cranky-kirch
+  host: chris-hudlinjs
