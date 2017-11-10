@@ -1,0 +1,7 @@
+---
+applications:
+- name: cranky-kirch
+  memory: 512m
+  instances: 1
+  buildpack: nodejs_buildpack
+  host: cranky-kirch
